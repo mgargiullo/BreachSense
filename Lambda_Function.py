@@ -1,38 +1,13 @@
 import json
 import os
 import requests
-import boto3
-from botocore.exceptions import ClientError
-
-
-def get_secret():
-
-    secret_name = "Breachsense_API_Key"
-    region_name = "us-east-1"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except ClientError as e:
-        # For a list of exceptions thrown, see
-        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-        raise e
-
-    secret = get_secret_value_response['SecretString']
-    return secret
 
 def lambda_handler(event, context):
-    API_KEY = get_secret()
-    API_URL = os.environ.get('BS_API_URL')
-    PARAMS = {'lic': API_KEY, 's': event['search_string'], 'json': True, 'attr': True}
+    txt_key = '{"BS_API_KEY":"6f77cd0dfb00fb7860687eef1ec964ec"}'
+    json_key = json.loads(txt_key)
+    API_KEY = json_key['BS_API_KEY']
+    API_URL = 'https://api.breachsense.com/creds'
+    PARAMS = {'lic': API_KEY, 's': event['search_string'], 'attr': True}
     req = requests.get(API_URL, params=PARAMS)
     returned_data = json.loads(req.text)
     tmp_dict = dict()
@@ -61,3 +36,4 @@ def lambda_handler(event, context):
 
     return json.dumps(breach_info)
 
+lambda_handler({"search_string":"mgargiullo@gmail.com"}, "")
