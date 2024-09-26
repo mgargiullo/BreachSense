@@ -34,7 +34,7 @@ def lambda_handler(event, context):
     API_URL = os.environ.get('BS_API_URL')
     PARAMS = {'lic': API_KEY, 's': event['search_string'], 'json': True, 'attr': True}
     req = requests.get(API_URL, params=PARAMS)
-    returned_data = req.json()
+    returned_data = json.loads(req.text)
     tmp_dict = dict()
     for item in returned_data:
         email = item['eml']
